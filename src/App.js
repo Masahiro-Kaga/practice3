@@ -1,10 +1,13 @@
-import React from "react";
+import './App.css';
+import Async from './components/Async';
+import Greeting from './components/Greeting';
 
 function App() {
   return (
-    <React.Fragment>
-      test
-    </React.Fragment>
+    <div className="App">
+      <Async></Async>
+      <Greeting></Greeting>
+    </div>
   );
 }
 

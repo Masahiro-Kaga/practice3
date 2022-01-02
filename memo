@@ -1,0 +1,152 @@
+参考URL
+    https://zenn.dev/k_matsumoto/articles/1ca53997a1df5f#render%E3%81%A8getbyrole%E3%81%A8tobetruthy
+
+
+
+
+381,382,383,384
+
+    testとは、の説明。
+
+    Manual testingは、これまでやってきたもの。プレビューでいつもデベロッパーが見て取れるエラー。
+    Auromated testingは、エクストラコードを書いて、自動でテストさせるもの。すごくテクニカルだが、一度に全てのブロックのテストができる。
+        Unit Tests 独立した各ブロック（Function,Conponents）を個別にテスト。一番重要で多い。
+        Integration Tests 色んなブロックを組み合わせたコンビネーションテスト。
+        End to End (e2e) Tests 完全に走った場合にユーザー側にどう映るか。少数テストをする。でもマニュアリにすでにやっているものに近い。
+    がある。
+
+
+385
+
+    どういうツールを使ってUnitテストをやるのか。
+    Jest - Running test and asserting the rusult.
+    React Testing Library - For simulating(rendering) React app / components.
+
+    Jest以外にもあるが、これが一番有名。
+    create-react-appした際に、既にインストールされている。package-jsonを確認。
+
+
+386     01-starting-project
+
+    App.test.jsでまずは説明してる。
+    testファンクション第一引数は、何のためのテストかの説明。
+    screenは仮想的にレンダリング結果を表示したり仮想DOMを構築してくれる。i はケースセンシティブじゃない、のオプション?
+
+    ＊＊＊＊/Hello world/i　のスラッシュとかiの使い方も調べるべき、正規表現？＊＊＊＊
+    
+    結果はtrue、App.jsの中に実際にLearn Reactの文字があるから。
+
+    npm test で選択オプションがまず出てくる。
+    a を選択。
+
+    Watchしてくれてるので、そのままLearn Reactをちょっと変えてみる。
+    そしたらFailになる。
+
+    終了はコントロールC。
+
+
+387     02-writing-our-first-test
+
+    新しいダミーコンポーネントとテストjsを作成。
+    App.test.jsと同じように作ってみる。
+    なお、getByTextは、デフォルトだと完全にマッチするかどうかということをチェックする。
+    第二引数にオプションをつけて、マッチしないとテスト合格とする、などの設定ができる。
+    ググってみそ。
+    ３Aが構造、Arrange,Act,assert
+
+
+388     03-test-suites
+
+    テストをグループ化する方法。
+    上のテスト結果で、
+        Test suites
+        Tests
+    の二つの項目があったが、Test Suitesがつまりグループ一塊の結果。
+
+    describe('グループ名',()=>{
+        test...
+    })
+
+    とする。
+
+
+389     04-testing-user-interaction-and-state
+
+    さらにいくつかコンポーネントとテストに加えて慣れてみる。
+    exactは、ケースセンシティブにするかしないかということ。
+    最後のはシンプルに見えてトリッキー。
+    getByTextでそのテキストが見つからなければ、expect以降をどう変えてもエラー（descriptive error）が出るとのこと。
+    not.toBeInTheDocument()  としてもダメみたい。
+    だから、もしその場合、queryBy...を使って、nullを検知するtoBeNullを使うと良いらしい。
+
+    その他、testing libraryを参照ください。
+    https://testing-library.com/docs/queries/about/
+
+
+390     05-testing-async-code
+
+    props.childrenを使って、ツリーの下のコンポーネントにあるデータとかも、Testing systemがツリーを辿って検知してくれるということの説明。
+    コンポーネントのルートに関連するtest.jsに、その下にあるコンポーネント分のテストもまとめて書けるという。
+
+    これが、一番最初に言ってた、Integration Testsってやつ。
+
+
+391     05-testing-async-code
+
+    非同期処理の場合のTestコードの書き方。
+    APIから何かデータをfetchした後の状態をテストする場合を想定。
+
+    ちなみに、タグを探してそれがあるか無いか判断するのはgetByRoleらしいが、その後のカッコに（listitem）とあるのはliタグを指してるとのこと。
+    これの対応表がある。この記事の中盤くらいにリンクがあるので、チェック。
+    https://zenn.dev/k_matsumoto/articles/1ca53997a1df5f#render%E3%81%A8getbyrole%E3%81%A8tobetruthy
+
+    しかし、今回は非同期処理のテスト。getByRoleは非同期に対応していない、
+    そのため、Promiseが含まれているfindByRoleを使用する。
+    https://zenn.dev/panyoriokome/scraps/78aecf55ba5a38
+    さらに、async/awaitのコードももつかわなきゃならない。
+    
+    async.jsはマックスが事前に作ってくれている。
+
+
+392     07-working-with-mocks
+
+    基本的には自分らのサーバーにhttpリクエストを送りたく無い、
+    A サーバーへの通信によってトラフィックを増やしたくない、得に他にもテストがたくさんあったりフェッチしなきゃならないコンポーネントがたくさんあったり。
+    B フェッチしてデータを持ってくる、っていうのならいいが、例えばデータを送ってその結果を戻す場合は、htmlなどの内容が更新されることもある。さらに実際のデータベースにテストにも関わらずデータが格納されるということになる。
+
+    それを防ぐために、フェイクのサーバーを仮想的に生み出す。
+    だから、サーバーがダウンしていたときでも、しっかりと機能する。
+    かつ、
+
+    window.fetch = jest.fn();
+    ダミー；モックファンクションを作ってくれる。
+    
+    window.fetch.mockResolvedValueOnce({
+      json: async () => [{ id: 'p1', title: 'First post' }],
+    });
+    fetchしたらjsonで返ってきて、その中のidとtitleをそれぞれ、データベースからこのidとtitle返ってきてもらいたい！っていうものを入れて、終わり。
+
+    ちょっと難しいので、必要になったらまた調べることとしましょう。
+
+
+
+
+おまけ（jest と react testing library の役割分担）
+
+    testにこんなの打ってみたら、こんなエラー出た。
+
+    test('test',() => {
+        return true;
+    });
+    ⇩
+    test functions can only return Promise or undefined.
+
+    つまりは、returnのところにPromiseとかundefinedが入ればテストは通る。
+    ここのあのにますファンクション、return以降の役割が、React test libraryということになる。
+    ちなみに、
+
+    test('test',() => {
+        return undefined;
+    });
+
+    とするとテストが通る。
